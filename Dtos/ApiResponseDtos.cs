@@ -1,4 +1,7 @@
-﻿namespace API.Dtos
+﻿using System.Text.Json.Serialization;
+
+
+namespace API.Dtos
 {
 
     /// <summary>
@@ -17,6 +20,8 @@
         /// <summary>Dados retornados (quando houver).</summary>
         public T? Data { get; set; }
 
+        public ApiResponseDtos() { }
+        [JsonConstructor]
         private ApiResponseDtos(bool success, string message, T? data = default)
         {
             Success = success;

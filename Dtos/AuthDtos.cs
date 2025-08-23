@@ -8,21 +8,23 @@ namespace API.Dtos
     /// <remarks>Usado em <c>POST /api/auth/register</c>.</remarks> 
     public class RegisterRequest
     {
-        [Required(ErrorMessage = "O nome é obrigatório.")]
-        [StringLength(100, MinimumLength = 2, ErrorMessage = "O nome deve ter entre 2 e 100 caracteres.")]
         /// <summary>Nome do usuário.</summary>
 
+        [Required(ErrorMessage = "O nome é obrigatório.")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "O nome deve ter entre 2 e 100 caracteres.")]
         public string Nome { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "O email é obrigatório.")]
-        [EmailAddress(ErrorMessage = "Formato de email inválido.")]
         /// <summary>E-mail do usuário.</summary>
+
+        [Required(ErrorMessage = "O email é obrigatório.")]
+
+        [EmailAddress(ErrorMessage = "Formato de email inválido.")]
         public string Email { get; set; } = string.Empty;
+
+        /// <summary>Senha em texto simples (apenas para o exercício).</summary>
 
         [Required(ErrorMessage = "A senha é obrigatória.")]
         [MinLength(6, ErrorMessage = "A senha deve ter no mínimo 6 caracteres.")]
-        /// <summary>Senha em texto simples (apenas para o exercício).</summary>
-
         public string Senha { get; set; } = string.Empty;
     }
 
@@ -32,15 +34,13 @@ namespace API.Dtos
     /// <remarks>Usado em <c>POST /api/auth/login</c>.</remarks>
     public class LoginRequest
     {
+        /// <summary>E-mail do usuário.</summary>
         [Required(ErrorMessage = "O email é obrigatório.")]
         [EmailAddress(ErrorMessage = "Formato de email inválido.")]
-        /// <summary>E-mail do usuário.</summary>
-
         public string Email { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "A senha é obrigatória.")]
         /// <summary>Senha do usuário.</summary>
-
+        [Required(ErrorMessage = "A senha é obrigatória.")]
         public string Senha { get; set; } = string.Empty;
     }
 

@@ -26,7 +26,7 @@ public class AuthIntegrationTests : IClassFixture<WebApplicationFactory<Program>
     public async Task Register_DeveCadastrarUsuarioRetornar200()
     {
         var emailUnico = $"teste_{Guid.NewGuid()}@email.com";
-        var user = new { Nome = "Teste", Email = emailUnico, Senha = "123" };
+        var user = new { Nome = "Teste", Email = emailUnico, Senha = "123456" };
 
         var response = await _client.PostAsJsonAsync("/api/auth/register", user);
 
@@ -36,7 +36,7 @@ public class AuthIntegrationTests : IClassFixture<WebApplicationFactory<Program>
     [Fact]
     public async Task Login_ComCredenciaisValidas_DeveRetornar200()
     {
-        var user = new { Nome = "LoginUser", Email = "login@email.com", Senha = "123" };
+        var user = new { Nome = "LoginUser", Email = "login@email.com", Senha = "123456" };
         await _client.PostAsJsonAsync("/api/auth/register", user);
 
         var login = new { Email = user.Email, Senha = user.Senha };
@@ -58,7 +58,7 @@ public class AuthIntegrationTests : IClassFixture<WebApplicationFactory<Program>
     public async Task Register_ComEmailDuplicado_DeveRetornar400()
     {
         var email = $"duplicado_{Guid.NewGuid()}@email.com";
-        var user = new { Nome = "User1", Email = email, Senha = "123" };
+        var user = new { Nome = "User1", Email = email, Senha = "123456" };
 
         await _client.PostAsJsonAsync("/api/auth/register", user);
         var response = await _client.PostAsJsonAsync("/api/auth/register", user);
@@ -70,7 +70,7 @@ public class AuthIntegrationTests : IClassFixture<WebApplicationFactory<Program>
     public async Task Login_ComSenhaErrada_DeveRetornar401()
     {
         var email = $"user_{Guid.NewGuid()}@email.com";
-        var user = new { Nome = "User2", Email = email, Senha = "123" };
+        var user = new { Nome = "User2", Email = email, Senha = "123456" };
         await _client.PostAsJsonAsync("/api/auth/register", user);
 
         var login = new { Email = email, Senha = "senhaerrada" };

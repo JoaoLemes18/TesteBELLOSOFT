@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Xunit;
+using API.Dtos;
 
 public class ClimateControllerTests : IClassFixture<WebApplicationFactory<Program>>
 {
@@ -25,14 +26,14 @@ public class ClimateControllerTests : IClassFixture<WebApplicationFactory<Progra
 
     private async Task<string> GetAuthTokenAsync()
     {
-        var user = new { Nome = "ClimaUser", Email = $"clima_{Guid.NewGuid()}@email.com", Senha = "123" };
+        var user = new { Nome = "ClimaUser", Email = $"clima_{Guid.NewGuid()}@email.com", Senha = "123456" };
         await _client.PostAsJsonAsync("/api/auth/register", user);
 
         var login = new { Email = user.Email, Senha = user.Senha };
         var response = await _client.PostAsJsonAsync("/api/auth/login", login);
 
-        var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
-        return result!["token"];
+        var result = await response.Content.ReadFromJsonAsync<ApiResponseDtos<LoginResponse>>();
+        return result!.Data!.Token;
     }
 
     [Fact]
