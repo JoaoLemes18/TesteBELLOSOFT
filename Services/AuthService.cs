@@ -7,6 +7,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Services
 {
+    /// <summary>
+    /// Implementação das regras de negócio de clima.
+    /// Responsável por consumir a Open-Meteo e persistir registros.
+    /// </summary>
     public class AuthService : IAuthService
     {
         private readonly ApplicationDbContext _context;

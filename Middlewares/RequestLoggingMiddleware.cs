@@ -2,6 +2,9 @@
 
 namespace API.Middlewares
 {
+    /// <summary>
+    /// Registra logs estruturados de cada requisição/resposta.
+    /// </summary>
     public class RequestLoggingMiddleware
     {
         private readonly RequestDelegate _next;
@@ -17,7 +20,6 @@ namespace API.Middlewares
         {
             var stopwatch = Stopwatch.StartNew();
 
-            // Passa pro próximo middleware/controller
             await _next(context);
 
             stopwatch.Stop();

@@ -4,6 +4,10 @@ using API.Dtos;
 
 namespace API.Middlewares
 {
+
+    /// <summary>
+    /// Captura exceções não tratadas e retorna envelope padronizado.
+    /// </summary>
     public class ErrorHandlingMiddleware
     {
         private readonly RequestDelegate _next;
