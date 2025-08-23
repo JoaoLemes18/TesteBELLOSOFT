@@ -9,5 +9,6 @@ namespace API.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
         public DbSet<ClimateRecord> ClimateRecords => Set<ClimateRecord>();
+        public DbSet<User> Users => Set<User>();
     }
 }
