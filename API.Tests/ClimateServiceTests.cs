@@ -1,69 +1,95 @@
-﻿using Xunit;
-using Moq;
-using System.Net;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-
-using API.Services;
-using API.Repositories;
+﻿using API.Dtos;
 using API.Models;
-using API.Dtos;
+using API.Services;
+using Moq;
+using Microsoft.Extensions.Logging;
+using System.Net;
+using Xunit;
 
 public class ClimateServiceTests
 {
     [Fact]
-    public async Task FetchAndSaveAsync_DeveRetornarRegistroQuandoApiResponder()
+    public async Task FetchAndSaveAsync_DeveRetornarRegistro()
     {
-        // Arrange - resposta fake da API Open-Meteo
-        var json = """
-        {
-          "latitude": 37.56,
-          "longitude": 126.97,
-          "current_weather": {
-            "temperature": 25.5,
-            "windspeed": 3.1,
-            "winddirection": 200,
-            "is_day": 1,
-            "time": "2025-08-23T12:00:00Z"
-          }
-        }
-        """;
-
-        var handler = new FakeHttpHandler(json);
-        var http = new HttpClient(handler);
-
-        var repoMock = new Mock<IClimateRepository>();
-        repoMock.Setup(r => r.AddAsync(It.IsAny<ClimateRecord>()))
-                .Returns(Task.CompletedTask);
-
+        // Arrange
+        var repoMock = new Mock<API.Repositories.IClimateRepository>();
         var loggerMock = new Mock<ILogger<ClimateService>>();
-        var service = new ClimateService(http, repoMock.Object, loggerMock.Object);
 
-        var req = new ClimateSyncRequest { City = "Seoul", Latitude = 37.56, Longitude = 126.97 };
+        var fakeHttp = new HttpClient(new FakeHandler())
+        {
+            BaseAddress = new Uri("http://localhost")
+        };
+
+        var service = new ClimateService(fakeHttp, repoMock.Object, loggerMock.Object);
+
+        var request = new ClimateSyncRequest
+        {
+            City = "TestCity",
+            Latitude = 10,
+            Longitude = 20
+        };
 
         // Act
-        var result = await service.FetchAndSaveAsync(req);
+        var record = await service.FetchAndSaveAsync(request);
+
+        // Assert
+        Assert.NotNull(record);
+        Assert.Equal("TestCity", record.City);
+    }
+
+    [Fact]
+    public async Task GetHistoryAsync_DeveRetornarListaDeRegistros()
+    {
+        // Arrange
+        var repoMock = new Mock<API.Repositories.IClimateRepository>();
+        var loggerMock = new Mock<ILogger<ClimateService>>();
+
+        var fakeHttp = new HttpClient(new FakeHandler())
+        {
+            BaseAddress = new Uri("http://localhost")
+        };
+
+        // cria lista fake
+        var registros = new List<ClimateRecord>
+        {
+            new ClimateRecord { City = "Cuiaba", TemperatureC = 30, CapturedAtUtc = DateTime.UtcNow },
+            new ClimateRecord { City = "Várzea Grande", TemperatureC = 28, CapturedAtUtc = DateTime.UtcNow }
+        };
+
+        // Configura mock para retornar a lista
+        repoMock.Setup(r => r.GetAllAsync()).ReturnsAsync(registros);
+
+        var service = new ClimateService(fakeHttp, repoMock.Object, loggerMock.Object);
+
+        // Act
+        var result = await service.GetHistoryAsync();
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal("Seoul", result.City);
-        Assert.Equal(25.5, result.TemperatureC);
+        Assert.Equal(2, result.Count);
+        Assert.Contains(result, r => r.City == "Cuiaba");
+        Assert.Contains(result, r => r.City == "Várzea Grande");
     }
 
-    private class FakeHttpHandler : HttpMessageHandler
+    private class FakeHandler : HttpMessageHandler
     {
-        private readonly string _response;
-        public FakeHttpHandler(string response) => _response = response;
-
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var msg = new HttpResponseMessage(HttpStatusCode.OK)
+            var json = @"{
+                ""latitude"": 10,
+                ""longitude"": 20,
+                ""current_weather"": {
+                    ""temperature"": 25.5,
+                    ""windspeed"": 10.1,
+                    ""winddirection"": 180,
+                    ""is_day"": 1
+                }
+            }";
+
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
             {
-                Content = new StringContent(_response)
-            };
-            return Task.FromResult(msg);
+                Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json")
+            });
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using System.ComponentModel.DataAnnotations;
 
 namespace API.Dtos
 {
@@ -22,8 +23,14 @@ namespace API.Dtos
 
     public class ClimateSyncRequest
     {
+        [Required(ErrorMessage = "A cidade é obrigatória")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "O nome da cidade deve ter entre 2 e 100 caracteres")]
         public string City { get; set; } = "Cuiabá";
+
+        [Range(-90, 90, ErrorMessage = "Latitude deve estar entre -90 e 90 graus")]
         public double Latitude { get; set; } = -15.60;
+
+        [Range(-180, 180, ErrorMessage = "Longitude deve estar entre -180 e 180 graus")]
         public double Longitude { get; set; } = -56.10;
     }
 }
