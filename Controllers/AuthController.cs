@@ -20,6 +20,16 @@ namespace API.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest req)
         {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+
+                return BadRequest(ApiResponse<string>.Fail("Dados inválidos: " + string.Join(" | ", errors)));
+            }
+
             var result = await _authService.RegisterAsync(req.Nome, req.Email, req.Senha);
 
             if (!result.Success)
@@ -31,6 +41,16 @@ namespace API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest req)
         {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+
+                return BadRequest(ApiResponse<string>.Fail("Dados inválidos: " + string.Join(" | ", errors)));
+            }
+
             var result = await _authService.LoginAsync(req.Email, req.Senha);
 
             if (!result.Success || result.Token is null)

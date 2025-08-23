@@ -13,14 +13,17 @@ namespace API.Repositories
 
         public async Task AddAsync(ClimateRecord record)
         {
-            _ctx.ClimateRecords.Add(record);
+            await _ctx.ClimateRecords.AddAsync(record);
             await _ctx.SaveChangesAsync();
         }
 
-        public Task<List<ClimateRecord>> GetAllAsync()
-            => _ctx.ClimateRecords
-                   .OrderByDescending(c => c.CapturedAtUtc)
-                   .Take(200)
-                   .ToListAsync();
+        public async Task<List<ClimateRecord>> GetAllAsync()
+        {
+            return await _ctx.ClimateRecords
+                .AsNoTracking() 
+                .OrderByDescending(c => c.CapturedAtUtc)
+                .Take(200)
+                .ToListAsync();
+        }
     }
 }
