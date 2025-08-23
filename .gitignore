@@ -361,3 +361,25 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Configurações locais de ambiente
+appsettings.Development.json
+appsettings.Local.json
+appsettings.*.json
+!appsettings.json
+!appsettings.example.json
+
+# Logs locais
+*.log
+logs/
+Logs/
+
+# Banco de dados SQLite local (se usado)
+*.db
+*.sqlite
+
+# Docker
+docker-compose.override.yml
+
+# Secrets do .NET
+secrets.json
