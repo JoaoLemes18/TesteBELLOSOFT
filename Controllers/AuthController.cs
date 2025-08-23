@@ -1,6 +1,5 @@
 ﻿using API.Dtos;
 using API.Interfaces;
-using API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,9 +18,9 @@ namespace API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] User user)
+        public async Task<IActionResult> Register([FromBody] RegisterRequest req)
         {
-            var result = await _authService.RegisterAsync(user.Nome, user.Email, user.Senha);
+            var result = await _authService.RegisterAsync(req.Nome, req.Email, req.Senha);
 
             if (!result.Success)
                 return BadRequest(ApiResponse<string>.Fail(result.Message));
@@ -30,14 +29,21 @@ namespace API.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] User login)
+        public async Task<IActionResult> Login([FromBody] LoginRequest req)
         {
-            var result = await _authService.LoginAsync(login.Email, login.Senha);
+            var result = await _authService.LoginAsync(req.Email, req.Senha);
 
-            if (!result.Success)
+            if (!result.Success || result.Token is null)
                 return Unauthorized(ApiResponse<string>.Fail(result.Message));
 
-            return Ok(ApiResponse<object>.Ok(new { token = result.Token, nome = login.Nome, email = login.Email }, "Login realizado com sucesso."));
+            var response = new LoginResponse
+            {
+                Token = result.Token,
+                Nome = result.Nome ?? string.Empty,
+                Email = result.Email ?? string.Empty
+            };
+
+            return Ok(ApiResponse<LoginResponse>.Ok(response, "Login realizado com sucesso."));
         }
     }
 }

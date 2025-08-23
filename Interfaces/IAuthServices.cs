@@ -1,8 +1,11 @@
-﻿namespace API.Interfaces
+﻿using API.Dtos;
+using System.Threading.Tasks;
+
+namespace API.Interfaces
 {
     public interface IAuthService
     {
-        Task<(bool Success, string Message)> RegisterAsync(string nome, string email, string senha);
-        Task<(bool Success, string Token, string? Message)> LoginAsync(string email, string senha);
+        Task<AuthResult> RegisterAsync(string nome, string email, string senha);
+        Task<AuthResult> LoginAsync(string email, string senha);
     }
 }

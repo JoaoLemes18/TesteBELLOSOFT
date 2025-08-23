@@ -1,11 +1,9 @@
 ﻿using API.Data;
+using API.Dtos;
+using API.Helpers;
 using API.Interfaces;
 using API.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 
 namespace API.Services
 {
@@ -20,50 +18,56 @@ namespace API.Services
             _config = config;
         }
 
-        public async Task<(bool Success, string Message)> RegisterAsync(string nome, string email, string senha)
+        public async Task<AuthResult> RegisterAsync(string nome, string email, string senha)
         {
-            if (await _context.Users.AnyAsync(u => u.Email == email))
-                return (false, "Email já cadastrado.");
-
-            var user = new User { Nome = nome, Email = email, Senha = senha };
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            return (true, "Usuário cadastrado com sucesso!");
-        }
-
-        public async Task<(bool Success, string Token, string? Message)> LoginAsync(string email, string senha)
-        {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email && u.Senha == senha);
-
-            if (user is null)
-                return (false, string.Empty, "Credenciais inválidas");
-
-            var token = GenerateJwtToken(user);
-            return (true, token, null);
-        }
-
-        private string GenerateJwtToken(User user)
-        {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var claims = new[]
+            var exists = await _context.Users.AnyAsync(u => u.Email == email);
+            if (exists)
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-                new Claim("nome", user.Nome),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                return new AuthResult
+                {
+                    Success = false,
+                    Message = "Email já cadastrado."
+                };
+            }
+
+            var user = new User
+            {
+                Nome = nome,
+                Email = email,
+                Senha = senha
             };
 
-            var token = new JwtSecurityToken(
-                issuer: _config["Jwt:Issuer"],
-                audience: _config["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.UtcNow.AddHours(2),
-                signingCredentials: creds
-            );
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return new AuthResult
+            {
+                Success = true,
+                Message = "Usuário registrado com sucesso."
+            };
         }
+
+
+        public async Task<AuthResult> LoginAsync(string email, string senha)
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == email && u.Senha == senha);
+
+            if (user == null)
+                return new AuthResult { Success = false, Message = "Credenciais inválidas" };
+
+            var token = JwtTokenHelper.GenerateToken(user, _config);
+
+            return new AuthResult
+            {
+                Success = true,
+                Token = token,
+                Nome = user.Nome,
+                Email = user.Email,
+                Message = "Login realizado com sucesso."
+            };
+        }
+
     }
 }
+
