@@ -5,6 +5,7 @@ using Moq;
 using Microsoft.Extensions.Logging;
 using System.Net;
 using Xunit;
+using API.Interfaces;
 
 public class ClimateServiceTests
 {
@@ -12,7 +13,7 @@ public class ClimateServiceTests
     public async Task FetchAndSaveAsync_DeveRetornarRegistro()
     {
         // Arrange
-        var repoMock = new Mock<API.Repositories.IClimateRepository>();
+        var repoMock = new Mock<IClimateRepository>();
         var loggerMock = new Mock<ILogger<ClimateService>>();
 
         var fakeHttp = new HttpClient(new FakeHandler())
@@ -41,7 +42,7 @@ public class ClimateServiceTests
     public async Task GetHistoryAsync_DeveRetornarListaDeRegistros()
     {
         // Arrange
-        var repoMock = new Mock<API.Repositories.IClimateRepository>();
+        var repoMock = new Mock<IClimateRepository>();
         var loggerMock = new Mock<ILogger<ClimateService>>();
 
         var fakeHttp = new HttpClient(new FakeHandler())

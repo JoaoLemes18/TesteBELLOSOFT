@@ -1,11 +1,11 @@
 ﻿using API.Dtos;
+using API.Interfaces;
 using API.Models;
-using API.Repositories;
 using System.Net.Http.Json;
 
 namespace API.Services
 {
-    public class ClimateService
+    public class ClimateService : IClimateService
     {
         private readonly HttpClient _http;
         private readonly IClimateRepository _repo;

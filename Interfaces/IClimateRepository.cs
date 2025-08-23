@@ -1,6 +1,6 @@
 ﻿using API.Models;
 
-namespace API.Repositories
+namespace API.Interfaces
 {
     public interface IClimateRepository
     {

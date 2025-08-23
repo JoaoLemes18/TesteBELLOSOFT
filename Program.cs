@@ -1,6 +1,8 @@
 ﻿using API.Data;
 using API.Repositories;
 using API.Services;
+using API.Interfaces;
+using API.Middlewares; 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -18,6 +20,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
+
     var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     c.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
@@ -50,7 +53,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // ==========================================
-// Banco de Dados (MySQL via Pomelo)
+// Banco de Dados
 // ==========================================
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySql(
@@ -59,16 +62,19 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     ));
 
 // ==========================================
-// Repositórios e Services
+// Repositórios e Services (injeção de dependência)
 // ==========================================
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IClimateRepository, ClimateRepository>();
+builder.Services.AddScoped<IClimateService, ClimateService>(); // <-- FALTOU ESSE
+
 builder.Services.AddHttpClient<ClimateService>(c =>
 {
     c.Timeout = TimeSpan.FromSeconds(10);
 });
 
 // ==========================================
-// Autenticação com JWT
+// Autenticação JWT
 // ==========================================
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -101,15 +107,20 @@ using (var scope = app.Services.CreateScope())
 // ==========================================
 // Middlewares
 // ==========================================
+
+app.UseErrorHandling();
+app.UseRequestLogging(); //log de requests
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseAuthentication();
+app.UseAuthentication(); 
 app.UseAuthorization();
 
 app.MapControllers();
 app.Run();
+
 public partial class Program { }
