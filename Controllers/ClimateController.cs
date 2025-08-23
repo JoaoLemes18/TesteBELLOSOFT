@@ -21,17 +21,17 @@ namespace API.Controllers
         public async Task<IActionResult> Sync([FromBody] ClimateSyncRequest request, CancellationToken ct)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ApiResponse<string>.Fail("Dados inválidos."));
+                return BadRequest(ApiResponseDtos<string>.Fail("Dados inválidos."));
 
             var rec = await _service.FetchAndSaveAsync(request, ct);
-            return Ok(ApiResponse<object>.Ok(rec, "Sincronizado com sucesso."));
+            return Ok(ApiResponseDtos<object>.Ok(rec, "Sincronizado com sucesso."));
         }
 
         [HttpGet("history")]
         public async Task<IActionResult> History()
         {
             var list = await _service.GetHistoryAsync();
-            return Ok(ApiResponse<object>.Ok(list, "Histórico retornado com sucesso."));
+            return Ok(ApiResponseDtos<object>.Ok(list, "Histórico retornado com sucesso."));
         }
     }
 }

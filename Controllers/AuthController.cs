@@ -27,15 +27,15 @@ namespace API.Controllers
                     .Select(e => e.ErrorMessage)
                     .ToList();
 
-                return BadRequest(ApiResponse<string>.Fail("Dados inválidos: " + string.Join(" | ", errors)));
+                return BadRequest(ApiResponseDtos<string>.Fail("Dados inválidos: " + string.Join(" | ", errors)));
             }
 
             var result = await _authService.RegisterAsync(req.Nome, req.Email, req.Senha);
 
             if (!result.Success)
-                return BadRequest(ApiResponse<string>.Fail(result.Message));
+                return BadRequest(ApiResponseDtos<string>.Fail(result.Message));
 
-            return Ok(ApiResponse<string>.Ok(null, result.Message));
+            return Ok(ApiResponseDtos<string>.Ok(null, result.Message));
         }
 
         [HttpPost("login")]
@@ -48,13 +48,13 @@ namespace API.Controllers
                     .Select(e => e.ErrorMessage)
                     .ToList();
 
-                return BadRequest(ApiResponse<string>.Fail("Dados inválidos: " + string.Join(" | ", errors)));
+                return BadRequest(ApiResponseDtos<string>.Fail("Dados inválidos: " + string.Join(" | ", errors)));
             }
 
             var result = await _authService.LoginAsync(req.Email, req.Senha);
 
             if (!result.Success || result.Token is null)
-                return Unauthorized(ApiResponse<string>.Fail(result.Message));
+                return Unauthorized(ApiResponseDtos<string>.Fail(result.Message));
 
             var response = new LoginResponse
             {
@@ -63,7 +63,7 @@ namespace API.Controllers
                 Email = result.Email ?? string.Empty
             };
 
-            return Ok(ApiResponse<LoginResponse>.Ok(response, "Login realizado com sucesso."));
+            return Ok(ApiResponseDtos<LoginResponse>.Ok(response, "Login realizado com sucesso."));
         }
     }
 }

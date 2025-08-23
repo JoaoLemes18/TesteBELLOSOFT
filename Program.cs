@@ -2,7 +2,7 @@
 using API.Repositories;
 using API.Services;
 using API.Interfaces;
-using API.Middlewares; 
+using API.Middlewares;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -19,13 +19,18 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Weather & Auth API",
+        Version = "v1",
+        Description = "API para autenticação de usuários e sincronização de clima (Open-Meteo)."
+    });
 
     var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    c.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
+    if (File.Exists(xmlPath))
+        c.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
 
-    // Configuração de segurança JWT no Swagger
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -33,7 +38,7 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Digite 'Bearer' + espaço + o token JWT.\n\nExemplo: 'Bearer 12345abcdef'"
+        Description = "Digite 'Bearer' + espaço + o token JWT.\n\nExemplo: `Bearer 12345abcdef`"
     });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -47,13 +52,13 @@ builder.Services.AddSwaggerGen(c =>
                     Id = "Bearer"
                 }
             },
-            new string[] {}
+            Array.Empty<string>()
         }
     });
 });
 
 // ==========================================
-// Banco de Dados
+// Banco de Dados (MySQL via Pomelo)
 // ==========================================
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySql(
@@ -66,9 +71,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // ==========================================
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IClimateRepository, ClimateRepository>();
-builder.Services.AddScoped<IClimateService, ClimateService>(); // <-- FALTOU ESSE
+builder.Services.AddScoped<IClimateService, ClimateService>();
 
-builder.Services.AddHttpClient<ClimateService>(c =>
+builder.Services.AddHttpClient<IClimateService, ClimateService>(c =>
 {
     c.Timeout = TimeSpan.FromSeconds(10);
 });
@@ -107,9 +112,8 @@ using (var scope = app.Services.CreateScope())
 // ==========================================
 // Middlewares
 // ==========================================
-
-app.UseErrorHandling();
-app.UseRequestLogging(); //log de requests
+app.UseErrorHandling();     
+app.UseRequestLogging();    
 
 if (app.Environment.IsDevelopment())
 {
@@ -117,7 +121,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseAuthentication(); 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

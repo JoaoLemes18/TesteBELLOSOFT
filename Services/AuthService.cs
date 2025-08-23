@@ -18,12 +18,12 @@ namespace API.Services
             _config = config;
         }
 
-        public async Task<AuthResult> RegisterAsync(string nome, string email, string senha)
+        public async Task<AuthResultDtos> RegisterAsync(string nome, string email, string senha)
         {
             var exists = await _context.Users.AnyAsync(u => u.Email == email);
             if (exists)
             {
-                return new AuthResult
+                return new AuthResultDtos
                 {
                     Success = false,
                     Message = "Email já cadastrado."
@@ -40,7 +40,7 @@ namespace API.Services
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
-            return new AuthResult
+            return new AuthResultDtos
             {
                 Success = true,
                 Message = "Usuário registrado com sucesso."
@@ -48,17 +48,17 @@ namespace API.Services
         }
 
 
-        public async Task<AuthResult> LoginAsync(string email, string senha)
+        public async Task<AuthResultDtos> LoginAsync(string email, string senha)
         {
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == email && u.Senha == senha);
 
             if (user == null)
-                return new AuthResult { Success = false, Message = "Credenciais inválidas" };
+                return new AuthResultDtos { Success = false, Message = "Credenciais inválidas" };
 
             var token = JwtTokenHelper.GenerateToken(user, _config);
 
-            return new AuthResult
+            return new AuthResultDtos
             {
                 Success = true,
                 Token = token,

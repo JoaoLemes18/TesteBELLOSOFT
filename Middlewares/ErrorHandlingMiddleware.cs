@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Text.Json;
+using API.Dtos;
 
 namespace API.Middlewares
 {
@@ -18,22 +19,45 @@ namespace API.Middlewares
         {
             try
             {
-                await _next(context); 
+                await _next(context);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro não tratado capturado pelo middleware");
+                _logger.LogError(ex, "Erro capturado pelo middleware");
 
-                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                var statusCode = HttpStatusCode.InternalServerError;
+                var message = "Ocorreu um erro inesperado. Tente novamente.";
+
+                switch (ex)
+                {
+                    case InvalidOperationException:
+                        statusCode = HttpStatusCode.BadRequest;
+                        message = ex.Message; 
+                        break;
+
+                    case UnauthorizedAccessException:
+                        statusCode = HttpStatusCode.Unauthorized;
+                        message = "Acesso não autorizado.";
+                        break;
+
+                    case KeyNotFoundException:
+                        statusCode = HttpStatusCode.NotFound;
+                        message = "Recurso não encontrado.";
+                        break;
+
+                }
+
+                context.Response.StatusCode = (int)statusCode;
                 context.Response.ContentType = "application/json";
 
-                var result = JsonSerializer.Serialize(new
-                {
-                    success = false,
-                    error = "Ocorreu um erro inesperado. Tente novamente.",
-                    details = ex.Message 
-                });
+                var response = ApiResponseDtos<string>.Fail(message);
 
+                if (context.RequestServices.GetRequiredService<IWebHostEnvironment>().IsDevelopment())
+                {
+                    response.Message += $" (Detalhes: {ex.Message})";
+                }
+
+                var result = JsonSerializer.Serialize(response);
                 await context.Response.WriteAsync(result);
             }
         }

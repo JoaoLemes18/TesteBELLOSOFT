@@ -1,6 +1,6 @@
 ﻿namespace API.Dtos
 {
-    public class AuthResult
+    public class AuthResultDtos
     {
         public bool Success { get; set; }
         public string? Token { get; set; }
