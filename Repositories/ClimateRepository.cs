@@ -1,11 +1,10 @@
 ﻿using API.Data;
-using Microsoft.EntityFrameworkCore;
-
 using API.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Repositories
 {
-    public class ClimateRepository
+    public class ClimateRepository : IClimateRepository
     {
         private readonly ApplicationDbContext _ctx;
 

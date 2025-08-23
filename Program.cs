@@ -61,7 +61,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // ==========================================
 // Repositórios e Services
 // ==========================================
-builder.Services.AddScoped<ClimateRepository>();
+builder.Services.AddScoped<IClimateRepository, ClimateRepository>();
 builder.Services.AddHttpClient<ClimateService>(c =>
 {
     c.Timeout = TimeSpan.FromSeconds(10);
@@ -107,8 +107,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseAuthentication(); // sempre antes do Authorization
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 app.Run();
+public partial class Program { }

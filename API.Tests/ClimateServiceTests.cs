@@ -1,14 +1,15 @@
-﻿using API.Models;
-using API.Repositories;
-using API.Services;
-using API.Dtos;
-using Microsoft.Extensions.Logging;
+﻿using Xunit;
 using Moq;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Xunit;
+using Microsoft.Extensions.Logging;
+
+using API.Services;
+using API.Repositories;
+using API.Models;
+using API.Dtos;
 
 public class ClimateServiceTests
 {
@@ -33,7 +34,7 @@ public class ClimateServiceTests
         var handler = new FakeHttpHandler(json);
         var http = new HttpClient(handler);
 
-        var repoMock = new Mock<ClimateRepository>(null!);
+        var repoMock = new Mock<IClimateRepository>();
         repoMock.Setup(r => r.AddAsync(It.IsAny<ClimateRecord>()))
                 .Returns(Task.CompletedTask);
 

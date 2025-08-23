@@ -8,10 +8,10 @@ namespace API.Services
     public class ClimateService
     {
         private readonly HttpClient _http;
-        private readonly ClimateRepository _repo;
+        private readonly IClimateRepository _repo;
         private readonly ILogger<ClimateService> _logger;
 
-        public ClimateService(HttpClient http, ClimateRepository repo, ILogger<ClimateService> logger)
+        public ClimateService(HttpClient http, IClimateRepository repo, ILogger<ClimateService> logger)
         {
             _http = http;
             _repo = repo;
