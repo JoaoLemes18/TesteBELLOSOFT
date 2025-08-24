@@ -232,6 +232,8 @@ Eles cobrem principalmente:
 
 ### ▶️ Rodar os testes
 ```bash
+cd API.Tests
+```
+```bash
 dotnet test
 ```
-
