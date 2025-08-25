@@ -133,7 +133,7 @@ POST /api/auth/register
 { "success": false, "message": "E-mail já registrado." }
 ```
 
-**Login**
+### Login
 ```http
 POST /api/auth/login
 ```
@@ -167,13 +167,10 @@ Authorization: Bearer {seu_token}
   {
     "city": "Cuiabá",
     "latitude": -15.601,
-    "longitude": -56.097,
-    "temperatureC": 34.5,
-    "windSpeed": 12.3,
-    "windDirection": 180,
-    "isDay": true
+    "longitude": -56.097
   }
 ]
+
 ```
 **200**
 ```json
