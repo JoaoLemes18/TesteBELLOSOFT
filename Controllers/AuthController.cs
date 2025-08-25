@@ -2,6 +2,7 @@
 using API.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace API.Controllers
 {
@@ -10,14 +11,12 @@ namespace API.Controllers
     /// </summary>
     [AllowAnonymous]
     [ApiController]
+    [Produces("application/json")]
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
 
-        /// <summary>
-        /// Construtor que injeta o serviço de autenticação.
-        /// </summary>
         public AuthController(IAuthService authService)
         {
             _authService = authService;
@@ -26,13 +25,9 @@ namespace API.Controllers
         /// <summary>
         /// Cadastra um novo usuário no sistema.
         /// </summary>
-        /// <param name="req">Dados do usuário (nome, email e senha).</param>
-        /// <returns>Mensagem de sucesso ou erro.</returns>
-        /// <response code="200">Usuário cadastrado com sucesso.</response>
-        /// <response code="400">Erro de validação ou e-mail já cadastrado.</response>
         [HttpPost("register")]
-        [ProducesResponseType(typeof(ApiResponseDtos<string>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponseDtos<string>), StatusCodes.Status400BadRequest)]
+        [SwaggerResponseExample(StatusCodes.Status200OK, typeof(AuthRegisterOkExample))]
+        [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(AuthRegisterBadRequestExample))]
         public async Task<IActionResult> Register([FromBody] RegisterRequest req)
         {
             if (!ModelState.IsValid)
@@ -56,14 +51,9 @@ namespace API.Controllers
         /// <summary>
         /// Realiza login de um usuário.
         /// </summary>
-        /// <param name="req">Credenciais de acesso (email e senha).</param>
-        /// <returns>Token JWT e dados do usuário autenticado.</returns>
-        /// <response code="200">Login realizado com sucesso.</response>
-        /// <response code="401">Credenciais inválidas.</response>
         [HttpPost("login")]
-        [ProducesResponseType(typeof(ApiResponseDtos<LoginResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponseDtos<string>), StatusCodes.Status401Unauthorized)]
-
+        [SwaggerResponseExample(StatusCodes.Status200OK, typeof(AuthLoginOkExample))]
+        [SwaggerResponseExample(StatusCodes.Status401Unauthorized, typeof(AuthLoginUnauthorizedExample))]
         public async Task<IActionResult> Login([FromBody] LoginRequest req)
         {
             if (!ModelState.IsValid)

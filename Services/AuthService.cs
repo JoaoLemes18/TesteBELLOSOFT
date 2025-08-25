@@ -1,30 +1,26 @@
-﻿using API.Data;
-using API.Dtos;
+﻿using API.Dtos;
 using API.Helpers;
 using API.Interfaces;
 using API.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace API.Services
 {
-    /// <summary>
-    /// Implementação das regras de negócio de clima.
-    /// Responsável por consumir a Open-Meteo e persistir registros.
-    /// </summary>
     public class AuthService : IAuthService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IUserRepository _users;
         private readonly IConfiguration _config;
 
-        public AuthService(ApplicationDbContext context, IConfiguration config)
+        public AuthService(IUserRepository users, IConfiguration config)
         {
-            _context = context;
+            _users = users;
             _config = config;
         }
 
         public async Task<AuthResultDtos> RegisterAsync(string nome, string email, string senha)
         {
-            var exists = await _context.Users.AnyAsync(u => u.Email == email);
+            email = email.Trim();
+
+            var exists = await _users.ExistsByEmailAsync(email);
             if (exists)
             {
                 return new AuthResultDtos
@@ -34,15 +30,16 @@ namespace API.Services
                 };
             }
 
+            var senhaHash = PasswordHelper.HashPassword(senha);
+
             var user = new User
             {
                 Nome = nome,
                 Email = email,
-                Senha = senha
+                Senha = senhaHash
             };
 
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
+            await _users.AddAsync(user);
 
             return new AuthResultDtos
             {
@@ -51,14 +48,15 @@ namespace API.Services
             };
         }
 
-
         public async Task<AuthResultDtos> LoginAsync(string email, string senha)
         {
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == email && u.Senha == senha);
+            email = email.Trim();
 
-            if (user == null)
+            var user = await _users.GetByEmailAsync(email);
+            if (user == null || !PasswordHelper.VerifyPassword(senha, user.Senha))
+            {
                 return new AuthResultDtos { Success = false, Message = "Credenciais inválidas" };
+            }
 
             var token = JwtTokenHelper.GenerateToken(user, _config);
 
@@ -71,7 +69,5 @@ namespace API.Services
                 Message = "Login realizado com sucesso."
             };
         }
-
     }
 }
-

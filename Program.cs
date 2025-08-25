@@ -6,6 +6,7 @@ using API.Middlewares;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Swashbuckle.AspNetCore.Filters;
 using Microsoft.OpenApi.Models;
 using System.Text;
 
@@ -55,7 +56,12 @@ builder.Services.AddSwaggerGen(c =>
             Array.Empty<string>()
         }
     });
+
+    c.ExampleFilters();
 });
+
+// registra os exemplos a partir do assembly atual
+builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
 
 // ==========================================
 // Banco de Dados (MySQL via Pomelo)
@@ -69,6 +75,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // ==========================================
 // Repositórios e Services (injeção de dependência)
 // ==========================================
+builder.Services.AddScoped<IUserRepository, AuthRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IClimateRepository, ClimateRepository>();
 builder.Services.AddScoped<IClimateService, ClimateService>();
@@ -100,9 +107,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
-// ==========================================
-// Banco: garante criação se não existir
-// ==========================================
+
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -112,8 +117,8 @@ using (var scope = app.Services.CreateScope())
 // ==========================================
 // Middlewares
 // ==========================================
-app.UseErrorHandling();     
-app.UseRequestLogging();    
+app.UseErrorHandling();
+app.UseRequestLogging();
 
 if (app.Environment.IsDevelopment())
 {
